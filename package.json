@@ -1,0 +1,12 @@
+{
+  "author": "mklabs",
+  "name": "vim-grunt",
+  "description": "A lightweight wrapper to Grunt, so that you could grunt things directly from Vim",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mklabs/grunt-plugins.git"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
