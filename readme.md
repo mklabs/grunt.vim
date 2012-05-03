@@ -22,7 +22,6 @@ then simply copy and paste:
 (todo) Once help tags have been generated, you can view the manual with
 `:help grunt`.
 
-
 Commands
 --------
 
@@ -36,16 +35,6 @@ A really simpe wrapper to `grunt` (should be installed and available in your
 **todo** below are rough feature goals of this project:
 
 Bunch of Stuff.
-
----
-
-Detect a grunt project. A simple thing (not as evolved as vim-rails)
-
-Probably by looking up and searching in the app directory for files like: `grunt.{js|coffee]`, `Gruntfile.{js|coffee}`
-
-if there is, add commands and all plugin stuff.
-
-Only one (or very few command) should be made global.
 
 ---
 
@@ -89,13 +78,17 @@ Super-handy mapping to jump to the given file, at the given line number (file un
 
 Grunt documentation as helpfiles, from doc/*.markdown in grunt repository.
 
-----
+---
 
-Todo: rewatch vim screencast on fugitive, trying to take inspiration, figure out what is possible to do.
-
-
+"goto file" for config entry in gruntfile.
 
 
+```js
+c*ss: {
 
+}
+``
+
+Should open `tasks/css.js`
 
 
