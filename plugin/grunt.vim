@@ -7,6 +7,7 @@ endif
 let g:loaded_grunt = 1
 
 let s:cwd = getcwd()
+let s:dirname=expand('<sfile>:h:h')
 
 "
 " Utility
@@ -55,7 +56,13 @@ function! s:GTask(bang, args)
   let cs = filereadable(task.'.coffee')
 
   if !cs && !js
+    " todo: put this in function. add plaholder ability, replace
+    " placeholder based on taskname.
     echo "No ". taskname ." task created yet"
+    let template=join([s:dirname, 'template', 'task.js'], '/')
+    echo "Loading from template ".template
+    exe "silent! 0r" template
+    setlocal filetype=javascript
     return
   endif
 
