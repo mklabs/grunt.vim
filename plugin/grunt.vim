@@ -1,5 +1,5 @@
 " grunt - A plugin to help working with Grunt
-" Maintainer:   mklabs
+" Maintainer: mklabs
 
 if exists("g:loaded_grunt") || v:version < 700 || &cp
   finish
@@ -16,25 +16,54 @@ let g:loaded_grunt = 1
 " - etc. etc.
 "
 
-let s:commands = []
-function! s:command(definition) abort
-  let s:commands += [a:definition]
-endfunction
 
-function! s:define_commands()
-  for command in s:commands
-    exe 'command! '.command
-  endfor
-endfunction
-
+" spawn helper, basic wrapper to :!
 function! s:Grunt(bang, args)
-  let out = system('grunt --no-color '.a:args)
-  echo out
+  let cmd = 'grunt --no-color '.a:args
+  execute ':!'.cmd
 endfunction
 
-call s:command("-bar -bang -nargs=? Grunt :execute s:Grunt(<bang>0,<q-args>)")
 
-call s:define_commands()
+"
+" Initialization
+"
+
+" detect a grunt project, a little crude right now, just checking cwd's gruntfile exists
+function! s:Detect()
+  let cwd = getcwd()
+  let gruntfile = join([cwd, 'grunt.js'], '/')
+  if filereadable(gruntfile)
+    return s:GrunInit()
+  endif
+
+  let gruntfile = join([cwd, 'Gruntfile.js'], '/')
+  if filereadable(gruntfile)
+    return s:GrunInit()
+  endif
+
+  let gruntfile = join([cwd, 'grunt.coffee'], '/')
+  if filereadable(gruntfile)
+    return s:GrunInit()
+  endif
+
+  let gruntfile = join([cwd, 'Gruntfile.coffee'], '/')
+  if filereadable(gruntfile)
+    return s:GrunInit()
+  endif
+endfunction
+
+augroup gruntDetect
+  autocmd!
+  autocmd BufNewFile * call s:Detect()
+  autocmd VimEnter * call s:Detect()
+augroup END
+
+command! -bar -bang -nargs=* Grunt call s:Grunt(<bang>0,<q-args>)
+
+
+" todo: should integrate with other plugins
+"
+" like NERDTree, auto refresh on some command
 
 
 " vim:set sw=2 sts=2:
