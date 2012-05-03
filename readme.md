@@ -38,14 +38,6 @@ Bunch of Stuff.
 
 ---
 
-path manipulation. `:h path`. So that we can `:find things` super-easily.
-
-* Add ./
-* Add tasks/
-* Add bin/
-
----
-
 Command `:Gtask` -> like vim-rails' `:R<command>` family of commands (says :Rcontroller)
 
 Easily jump to a given grunt task (like `:find` only on tasks dirs)
