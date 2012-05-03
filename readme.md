@@ -1,12 +1,20 @@
 grunt.vim
 ===========
 
-This is a lightweight wrapper to Grunt
-[Grunt](http://gruntjs.com). Features:
+This is a lightweight Vim plugin wrapper to [Grunt](http://gruntjs.com). Features:
 
 * `:Grunt`, which wraps `grunt`.
+
 * (todo) Grunt documentation as vim helpfile. Run `:Helptags` in the plugin directory
-  and you'll get a bunch of `:h grunt-*` available.
+  and you'll get a bunch of `:help grunt-*` available.
+
+* easier `:find`. The 'path' has been modified to include all the best
+  places to be (`bin/`, `tasks/` and current working directory) -
+  (see `:help path`, `:help find`, `:help gf`)
+
+* `:Gtask [{name}]` Edit the specified task (in
+  tasks/{name}.{js|coffee}}) or load a predefined template in current
+  buffer.
 
 
 Installation
@@ -30,25 +38,18 @@ Commands
 A really simpe wrapper to `grunt` (should be installed and available in your
 `$PATH`. If `grunt --version` display works, so do `:Grunt`.
 
+`:Gtask [{name}]`
+
+Edit the specified task (in tasks/{name}.{js|coffee}}) or load a
+predefined template in current buffer.
+
+(todo) A limited amount of completion should be provided.
+
 ----
 
 **todo** below are rough feature goals of this project:
 
 Bunch of Stuff.
-
----
-
-Command `:Gtask` -> like vim-rails' `:R<command>` family of commands (says :Rcontroller)
-
-Easily jump to a given grunt task (like `:find` only on tasks dirs)
-
----
-
-Command `:Grunt`. Basic wrapper to `grunt executable` (like vim-rails' `:Rake`)
-
-Use `:!` instead of `system`
-
-Open the quickfix window if there were any errors.
 
 ---
 
