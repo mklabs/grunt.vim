@@ -100,19 +100,9 @@ function! s:initOpenURL()
 endfunction
 
 "
-" Commands
-"
-
-" define commands loaded only on GruntDetect
-function! s:GruntCommands()
-  command! -bar -bang -nargs=* -complete=customlist,s:Complete_task Gtask call s:GTask(<bang>0,<q-args>)
-  command! -bar -nargs=1 -bang -complete=customlist,s:Complete_docs Gdoc call s:GDoc(<bang>0,<q-args>)
-  command! -bar -nargs=* -bang Glint call s:GLint()
-endfunction
-
-"
 " Completion
 "
+
 " will probably write a node script to get this back from github api
 " for now, a simple
 "
@@ -143,8 +133,18 @@ function! s:Complete_task(A,L,P)
   return s:completion_filter(taskjs + taskcs, a:A)
 endfunction
 
+"
+" Commands
+"
 
-" Task command -> :Gdoc
+" define commands loaded only on GruntDetect
+function! s:GruntCommands()
+  command! -bar -bang -nargs=* -complete=customlist,s:Complete_task Gtask call s:GTask(<bang>0,<q-args>)
+  command! -bar -nargs=1 -bang -complete=customlist,s:Complete_docs Gdoc call s:GDoc(<bang>0,<q-args>)
+  command! -bar -nargs=* -bang Glint call s:GLint()
+endfunction
+
+" Task command -> :Gdoc <page>
 "
 " Open a given grunt doc page in default browser
 " borrowed to vim-rails
@@ -159,40 +159,51 @@ function! s:GDoc(bang, page)
 endfunction
 
 "
-" Task command -> :Gtask
-" todo:
-"   - see if it has `/` in it. In which case, prepend the tasks/ dir
-"   - see if it has an extension. If not, append .js / .coffee.
-"   - ensure we always open a new buffer (or reuse opened buffer if task
-"   already in buffer list)
+" Task command -> :Gtask <task>
+"
+" Usage:
+"
+"     :Gtask tasks/foo.js
+"
+" Works best with completion, :Gtask <tab> should return any .js or
+" .coffee files under `tasks/`
+"
+" If the given `task` doesn't exist yet, then a predefined task template
+" is loaded into a new buffer.
+"
+" todo:ensure we always open a new buffer (or reuse opened buffer if
+" task already in buffer list)
+"
 function! s:GTask(bang, args)
-  " now a simple wrapper to `:edit` in tasks dir. Not even checking if
-  " file exists, completion, etc. to be improved
-  " - should edit / create buffer instead
-
-  " for now, we handle just the first arg
-  let file = get(split(a:args), 0)
-
-  " dumb-guess of task path, this is now always the cwd/tasks/:file
-  let task = join([s:cwd, file], '/')
-
-  let taskname = fnamemodify(task, ':.')
-
-  let readable = filereadable(task)
-
-  if !readable
-    " todo: put this in function. add plaholder ability, replace
-    " placeholder based on taskname.
-    echo "No ". taskname ." task created yet"
-    let template=join([s:dirname, 'template', 'task.js'], '/')
-    echo "Loading from template ".template
-    exe "edit" task
-    exe "silent! 0r" template
-    setlocal filetype=javascript
-    return
+  let filename = split(a:args)[0]
+  let ext = fnamemodify(filename, ':e') != ""
+  " append .js if filename is given without extension
+  " and prepend ./tasks/ dir if not already
+  let ispath = match(filename, '\/') != -1
+  let filename = ispath ? filename : join(['tasks', filename], '/')
+  if !ext
+    let filename = filename.'.js'
   endif
 
-  execute "edit" task
+  let task = join([s:cwd, filename], '/')
+  let readable = filereadable(task)
+
+  exe "edit" task
+  if !readable
+    call s:task_template(task)
+  endif
+endfunction
+
+
+function! s:task_template(task)
+  let taskname = fnamemodify(a:task, ':.')
+  let template=join([s:dirname, 'template', 'task.js'], '/')
+
+  echo "No ". taskname ." task created yet"
+  echo "Loading from template ".template
+
+  exe "silent! 0r" template
+  setlocal filetype=javascript
 endfunction
 
 " grunt lint wrapper, collect output for quickfix window
