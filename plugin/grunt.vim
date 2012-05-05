@@ -28,6 +28,31 @@ function! s:SetBasePath()
   :let &path=join(path, ',')
 endfunction
 
+" completion filter helper. borrowed to vim-rails:
+" https://github.com/tpope/vim-rails/blob/master/autoload/rails.vim#L2162-2173
+function! s:completion_filter(results,A)
+  let results = sort(type(a:results) == type("") ? split(a:results,"\n") : copy(a:results))
+  call filter(results,'v:val !~# "\\~$"')
+  let filtered = filter(copy(results),'s:startswith(v:val,a:A)')
+  if !empty(filtered) | return filtered | endif
+  let regex = s:gsub(a:A,'[^/]','[&].*')
+  let filtered = filter(copy(results),'v:val =~# "^".regex')
+  if !empty(filtered) | return filtered | endif
+  let regex = s:gsub(a:A,'.','[&].*')
+  let filtered = filter(copy(results),'v:val =~# regex')
+  return filtered
+endfunction
+
+" same here: https://github.com/tpope/vim-rails/blob/master/autoload/rails.vim#L35-41
+function! s:gsub(str,pat,rep)
+  return substitute(a:str,'\v\C'.a:pat,a:rep,'g')
+endfunction
+
+function! s:startswith(string,prefix)
+  return strpart(a:string, 0, strlen(a:prefix)) ==# a:prefix
+endfunction
+
+
 " Setup openURL command at starup, borrowed to vim-rails
 " https://github.com/tpope/vim-rails/blob/master/autoload/rails.vim#L1331-1345
 function! s:initOpenURL()
@@ -67,6 +92,20 @@ endfunction
 "
 " in my devtool at https://github.com/cowboy/grunt/tree/master/docs
 function! s:Complete_docs(A,L,P)
+  let pages = [
+    \ 'api', 'api_config', 'api_fail', 'api_file', 'api_log',
+    \ 'api_task', 'api_template', 'api_utils', 'contributing',
+    \ 'example_gruntfiles', 'exit_codes', 'faq', 'getting_started',
+    \ 'helpers_directives', 'plugins', 'task_concat', 'task_init',
+    \ 'task_lint', 'task_min', 'task_qunit', 'task_server',
+    \ 'toc', 'types_of_tasks']
+
+  return s:completion_filter(pages, a:A)
+endfunction
+
+" Completion helper for Gtask. Globs the tasks/ directory for any
+" .js or .coffee files
+function! s:Complete_task(A,L,P)
   return [
     \ 'api', 'api_config', 'api_fail', 'api_file', 'api_log',
     \ 'api_task', 'api_template', 'api_utils', 'contributing',
