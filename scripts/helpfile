@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#
+# Usage:
+#
+#     ./scripts/helpfile api > doc/grunt_api.txt
+#
+
+mhf=node_modules/markdown-helpfile/bin/vim-helpfile
+page=./node_modules/grunt/docs/$1.md
+
+# print helpfile header
+echo "*grunt_$1.txt*    Grunt $1: generated helpfile (grunt v0.3.9)"
+
+# 1. get rid of <a /> link in titles
+# 2. same for []() markdown link in titles
+# 3. pass it through the markdown to helpfile converter
+# 4. and delete the first line, previous echo deal with header
+cat $page \
+  | perl -pe 's|<a name.*|\1|' \
+  | perl -pe "s|(#+\s*)\[.+\)\s*\/|\1|" \
+  | node $mhf \
+  | sed '1d'
+

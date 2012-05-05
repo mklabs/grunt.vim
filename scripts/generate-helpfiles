@@ -1,0 +1,10 @@
+#!/bin/bash
+
+pages=$(ls ./node_modules/grunt/docs/)
+
+for page in $pages; do
+  page=${page%\.md}
+  [[ "$page" == "README" ]] && continue
+  echo "... Generating doc/grunt_$page.txt helpfile ..."
+  ./scripts/helpfile $page > doc/grunt_$page.txt
+done
