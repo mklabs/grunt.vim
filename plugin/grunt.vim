@@ -9,6 +9,7 @@ let g:loaded_grunt = 1
 let s:cwd = getcwd()
 let s:dirname=expand('<sfile>:h:h')
 
+
 "
 " Utility
 "
@@ -27,6 +28,24 @@ function! s:SetBasePath()
   :let &path=join(path, ',')
 endfunction
 
+" Setup openURL command at starup, borrowed to vim-rails
+" https://github.com/tpope/vim-rails/blob/master/autoload/rails.vim#L1331-1345
+function! s:initOpenURL()
+  if !exists(":OpenURL")
+    if has("gui_mac") || has("gui_macvim") || exists("$SECURITYSESSIONID")
+      command -bar -nargs=1 OpenURL :!open <args>
+    elseif has("gui_win32")
+      command -bar -nargs=1 OpenURL :!start cmd /cstart /b <args>
+    elseif executable("sensible-browser")
+      command -bar -nargs=1 OpenURL :!sensible-browser <args>
+    elseif executable('launchy')
+      command -bar -nargs=1 OpenURL :!launchy <args>
+    elseif executable('git')
+      command -bar -nargs=1 OpenURL :!git web--browse <args>
+    endif
+  endif
+endfunction
+
 "
 " Commands
 "
@@ -34,7 +53,30 @@ endfunction
 " define commands loaded only on GruntDetect
 function! s:GruntCommands()
   command! -bar -bang -nargs=* Gtask call s:GTask(<bang>0,<q-args>)
+  command! -bar -nargs=1 -bang Gdoc call s:GDoc(<bang>0,<q-args>)
 endfunction
+
+" Task command -> :Gdoc
+"
+" Open a given grunt doc page in default browser
+" borrowed to vim-rails
+function! s:GDoc(bang, page)
+  let url = 'https://github.com/cowboy/grunt/blob/master/docs/'.a:page.'.md'
+  echo '... Opening ' . url . ' ...'
+  if exists(':OpenURL')
+    exe 'OpenURL '.url
+  else
+    return s:error('No :OpenURL command found')
+  endif
+endfunction
+
+function! s:error(str)
+  echohl ErrorMsg
+  echo  a:str
+  echohl None
+endfunction
+
+
 
 " Task command -> :Gtask
 " Find a given tasks in ./tasks (make it configurable in some way?,
@@ -108,6 +150,8 @@ endfunction
 function! s:GruntInit()
   " narrow the path for easier find
   call s:SetBasePath()
+  " setup openURL command
+  call s:initOpenURL()
   " grunt-project commands
   call s:GruntCommands()
 endfunction
