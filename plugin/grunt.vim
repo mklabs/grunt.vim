@@ -52,9 +52,30 @@ endfunction
 
 " define commands loaded only on GruntDetect
 function! s:GruntCommands()
-  command! -bar -bang -nargs=* Gtask call s:GTask(<bang>0,<q-args>)
-  command! -bar -nargs=1 -bang Gdoc call s:GDoc(<bang>0,<q-args>)
+  command! -bar -bang -nargs=* -complete=customlist,s:Complete_task Gtask call s:GTask(<bang>0,<q-args>)
+  command! -bar -nargs=1 -bang -complete=customlist,s:Complete_docs Gdoc call s:GDoc(<bang>0,<q-args>)
 endfunction
+
+
+"
+" Completion
+"
+" will probably write a node script to get this back from github api
+" for now, a simple
+"
+"     $('.js-slide-to[id]').map(function(i, el) { return el.innerText; });
+"
+" in my devtool at https://github.com/cowboy/grunt/tree/master/docs
+function! s:Complete_docs(A,L,P)
+  return [
+    \ 'api', 'api_config', 'api_fail', 'api_file', 'api_log',
+    \ 'api_task', 'api_template', 'api_utils', 'contributing',
+    \ 'example_gruntfiles', 'exit_codes', 'faq', 'getting_started',
+    \ 'helpers_directives', 'plugins', 'task_concat', 'task_init',
+    \ 'task_lint', 'task_min', 'task_qunit', 'task_server',
+    \ 'toc', 'types_of_tasks']
+endfunction
+
 
 " Task command -> :Gdoc
 "
@@ -111,8 +132,6 @@ function! s:GTask(bang, args)
   let task = task.(cs ? '.coffee' : '.js')
   execute "edit" task
 endfunction
-
-"
 
 
 "
