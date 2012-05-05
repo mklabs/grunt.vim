@@ -17,6 +17,10 @@ let s:dirname=expand('<sfile>:h:h')
 "   current buffer
 "   - if it gets longer (and it will), put the bulk of the plugin in
 "   autoload.
+"   - commands should be prefixed by something setup by user, and this
+"   should default to :G<cmd>, so that it can be set to something else
+"   like :GR<cmd>, or :Grunt<cmd>.  The fugitive family of :G<cmd> with
+"   grunt ones may be confusing in tab completions.
 "
 
 "
@@ -77,7 +81,6 @@ function! s:error(str)
   echohl None
 endfunction
 
-
 " Setup openURL command at starup, borrowed to vim-rails
 " https://github.com/tpope/vim-rails/blob/master/autoload/rails.vim#L1331-1345
 function! s:initOpenURL()
@@ -104,6 +107,7 @@ endfunction
 function! s:GruntCommands()
   command! -bar -bang -nargs=* -complete=customlist,s:Complete_task Gtask call s:GTask(<bang>0,<q-args>)
   command! -bar -nargs=1 -bang -complete=customlist,s:Complete_docs Gdoc call s:GDoc(<bang>0,<q-args>)
+  command! -bar -nargs=* -bang Glint call s:GLint()
 endfunction
 
 "
@@ -191,6 +195,59 @@ function! s:GTask(bang, args)
   execute "edit" task
 endfunction
 
+" grunt lint wrapper, collect output for quickfix window
+" should it use :make and set makeprg instead?
+function! s:GLint()
+  let cmd='grunt --no-color lint'
+  let output = system(cmd)
+
+  " quickfix list of errors
+  let qflist = []
+
+  for error in split(output, 'Linting\|<WARN>')
+    " parse out each error
+    " let matches = matchlist(error, '')
+
+    " get file
+    let filename = matchstr(error, '[^ ]*\.coffee\|[^ ]*\.js')
+    if empty(filename)
+      continue
+    endif
+
+    " get line/cols/reason+snippet
+    let parts = filter(matchlist(error, '\v\[L(\d*)\:C(\d*)\]\s*([^\n]+)\n')[1:], '!empty(v:val)')
+    if empty(parts)
+      continue
+    endif
+
+    let line = parts[0]
+    let col = parts[1]
+    let reason = split(parts[2], '\n')[0]
+    let snippet = split(parts[2], '\n')[1]
+
+    " Store the error for the quickfix window
+    let qfitem = {}
+    " let qfitem.bufnr = bufnr('%')
+    " let qfitem.filename = expand('%')
+    let qfitem.filename = filename
+    let qfitem.lnum = line
+    let qfitem.text = reason
+    let qfitem.type = 'E'
+
+    " Add line to quickfix list
+    call add(qflist, qfitem)
+  endfor
+
+  call setqflist(qflist, 'r')
+
+  if !empty(qflist)
+    exe "copen"
+  else
+    echo "Lint free!"
+  endif
+
+endfunction
+
 
 "
 " Initialization
@@ -238,6 +295,7 @@ endfunction
 augroup gruntDetect
   autocmd!
   autocmd VimEnter * call s:Detect()
+  autocmd BufWritePost *.js call s:GLint()
 augroup END
 
 command! -bar -bang -nargs=* Grunt call s:Grunt(<bang>0,<q-args>)
