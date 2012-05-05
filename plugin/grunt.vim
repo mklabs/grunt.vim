@@ -104,15 +104,15 @@ function! s:Complete_docs(A,L,P)
 endfunction
 
 " Completion helper for Gtask. Globs the tasks/ directory for any
-" .js or .coffee files
+" .js or .coffee files. This currently implies and won't work if pathogen is
+" not used. But pathogen is pretty common in vim config now, should probably
+" add a few safeguard checks.
 function! s:Complete_task(A,L,P)
-  return [
-    \ 'api', 'api_config', 'api_fail', 'api_file', 'api_log',
-    \ 'api_task', 'api_template', 'api_utils', 'contributing',
-    \ 'example_gruntfiles', 'exit_codes', 'faq', 'getting_started',
-    \ 'helpers_directives', 'plugins', 'task_concat', 'task_init',
-    \ 'task_lint', 'task_min', 'task_qunit', 'task_server',
-    \ 'toc', 'types_of_tasks']
+  let taskjs = pathogen#glob('tasks/**/*.js')
+  let taskcs = pathogen#glob('tasks/**/*.coffee')
+  " really? array concat in vimscript simply means using the + operator
+  " love it
+  return s:completion_filter(taskjs + taskcs, a:A)
 endfunction
 
 
@@ -139,8 +139,11 @@ endfunction
 
 
 " Task command -> :Gtask
-" Find a given tasks in ./tasks (make it configurable in some way?,
-" should introspect gruntfile for grunt.loadTasks?
+" todo:
+"   - see if it has `/` in it. In which case, prepend the tasks/ dir
+"   - see if it has an extension. If not, append .js / .coffee.
+"   - ensure we always open a new buffer (or reuse opened buffer if task
+"   already in buffer list)
 function! s:GTask(bang, args)
   " now a simple wrapper to `:edit` in tasks dir. Not even checking if
   " file exists, completion, etc. to be improved
@@ -150,25 +153,24 @@ function! s:GTask(bang, args)
   let file = get(split(a:args), 0)
 
   " dumb-guess of task path, this is now always the cwd/tasks/:file
-  let task = join([s:cwd, 'tasks', file], '/')
+  let task = join([s:cwd, file], '/')
 
   let taskname = fnamemodify(task, ':.')
 
-  let js = filereadable(task.'.js')
-  let cs = filereadable(task.'.coffee')
+  let readable = filereadable(task)
 
-  if !cs && !js
+  if !readable
     " todo: put this in function. add plaholder ability, replace
     " placeholder based on taskname.
     echo "No ". taskname ." task created yet"
     let template=join([s:dirname, 'template', 'task.js'], '/')
     echo "Loading from template ".template
+    exe "edit" task
     exe "silent! 0r" template
     setlocal filetype=javascript
     return
   endif
 
-  let task = task.(cs ? '.coffee' : '.js')
   execute "edit" task
 endfunction
 
