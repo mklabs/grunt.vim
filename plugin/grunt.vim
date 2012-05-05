@@ -238,13 +238,22 @@ function! s:GLint()
     call add(qflist, qfitem)
   endfor
 
+  " update the qflist with action set to 'r'
   call setqflist(qflist, 'r')
 
-  if !empty(qflist)
-    exe "copen"
-  else
-    echo "Lint free!"
-  endif
+  " close / open quickfix window depending on errors length
+  let hasError = !empty(qflist)
+  exe (hasError ? 'copen' : 'cclose')
+
+  " redefine gruntlint autocmd group
+  " this removes any previously defined cmd in this group, and readd
+  " quickfix window update on save only if there's error.
+  augroup gruntlint
+    autocmd!
+    if hasError
+      au BufWritePost *.js call s:GLint()
+    endif
+  augroup END
 
 endfunction
 
@@ -292,10 +301,9 @@ function! s:GruntInit()
   call s:InitFind()
 endfunction
 
-augroup gruntDetect
+augroup gruntdetect
   autocmd!
   autocmd VimEnter * call s:Detect()
-  autocmd BufWritePost *.js call s:GLint()
 augroup END
 
 command! -bar -bang -nargs=* Grunt call s:Grunt(<bang>0,<q-args>)
