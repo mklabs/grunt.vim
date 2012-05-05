@@ -4,11 +4,20 @@
 if exists("g:loaded_grunt") || v:version < 700 || &cp
   finish
 endif
+
 let g:loaded_grunt = 1
 
 let s:cwd = getcwd()
 let s:dirname=expand('<sfile>:h:h')
 
+"
+" todo:
+"   - should probably do the grunt detect only on buff enter, instead of
+"   once at VimEnter. Mappings and commands would only take effect on
+"   current buffer
+"   - if it gets longer (and it will), put the bulk of the plugin in
+"   autoload.
+"
 
 "
 " Utility
@@ -21,11 +30,21 @@ function! s:Grunt(bang, args)
 endfunction
 
 " Set base path utility, for easier `:find`, super simplified here.
-" Should be improved.
+" Should be improved. (:h find)
 function! s:SetBasePath()
   " current directory + tasks and bin
   let path = ['', 'tasks/', 'bin/']
   :let &path=join(path, ',')
+endfunction
+
+" Used in gf command. Set includeexpr to append .js / .coffee files
+" automatically. Make it possible to easily 'goto file' with tasks.
+" (:h includeexpr).
+function! s:InitFind()
+  " :let &includeexpr=substitute(v:fname,'$','\\.js','g')
+
+  " or simply
+  :let &suffixesadd=".js,.coffee"
 endfunction
 
 " completion filter helper. borrowed to vim-rails:
@@ -50,6 +69,12 @@ endfunction
 
 function! s:startswith(string,prefix)
   return strpart(a:string, 0, strlen(a:prefix)) ==# a:prefix
+endfunction
+
+function! s:error(str)
+  echohl ErrorMsg
+  echo  a:str
+  echohl None
 endfunction
 
 
@@ -80,7 +105,6 @@ function! s:GruntCommands()
   command! -bar -bang -nargs=* -complete=customlist,s:Complete_task Gtask call s:GTask(<bang>0,<q-args>)
   command! -bar -nargs=1 -bang -complete=customlist,s:Complete_docs Gdoc call s:GDoc(<bang>0,<q-args>)
 endfunction
-
 
 "
 " Completion
@@ -129,14 +153,6 @@ function! s:GDoc(bang, page)
     return s:error('No :OpenURL command found')
   endif
 endfunction
-
-function! s:error(str)
-  echohl ErrorMsg
-  echo  a:str
-  echohl None
-endfunction
-
-
 
 " Task command -> :Gtask
 " todo:
@@ -214,6 +230,8 @@ function! s:GruntInit()
   call s:initOpenURL()
   " grunt-project commands
   call s:GruntCommands()
+  " grunt-project specific gf extension
+  call s:InitFind()
 endfunction
 
 augroup gruntDetect
