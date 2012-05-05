@@ -141,7 +141,9 @@ endfunction
 function! s:GruntCommands()
   command! -bar -bang -nargs=* -complete=customlist,s:Complete_task Gtask call s:GTask(<bang>0,<q-args>)
   command! -bar -nargs=1 -bang -complete=customlist,s:Complete_docs Gdoc call s:GDoc(<bang>0,<q-args>)
+  " should complete lint and test for subtargets, probably by parsing the gruntfile =/
   command! -bar -nargs=* -bang Glint call s:GLint()
+  command! -bar -nargs=* -bang Gtest call s:GTest()
 endfunction
 
 " Task command -> :Gdoc <page>
@@ -266,6 +268,10 @@ function! s:GLint()
     endif
   augroup END
 
+endfunction
+
+function! s:GTest()
+  call s:Grunt(0, 'test')
 endfunction
 
 
