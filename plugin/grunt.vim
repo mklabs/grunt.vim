@@ -154,6 +154,7 @@ function! s:GDoc(bang, page)
   endif
 endfunction
 
+"
 " Task command -> :Gtask
 " todo:
 "   - see if it has `/` in it. In which case, prepend the tasks/ dir

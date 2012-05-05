@@ -7,6 +7,8 @@
     "type": "git",
     "url": "git://github.com/mklabs/grunt-plugins.git"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "grunt": "~0.3.9",
+    "markdown-helpfile": "http://nodeload.github.com/mklabs/vim-markdown-helpfile/tarball/master"
+  }
 }
