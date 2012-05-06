@@ -11,6 +11,10 @@ let s:cwd = getcwd()
 let s:dirname=expand('<sfile>:h:h')
 
 "
+" # grunt.vim
+"
+
+"
 " todo:
 "   - should probably do the grunt detect only on buff enter, instead of
 "   once at VimEnter. Mappings and commands would only take effect on
@@ -24,7 +28,7 @@ let s:dirname=expand('<sfile>:h:h')
 "
 
 "
-" Utility
+" ## Utility
 "
 
 " spawn helper, basic wrapper to :!
@@ -43,11 +47,10 @@ endfunction
 
 " Used in gf command. Set includeexpr to append .js / .coffee files
 " automatically. Make it possible to easily 'goto file' with tasks.
-" (:h includeexpr).
+" (:h includeexpr). The find logic should be improved and be a little
+" bit more dynamic. Ideally, it should be easy to also jump to one of
+" the grunt source file (resolved globally or locally)
 function! s:InitFind()
-  " :let &includeexpr=substitute(v:fname,'$','\\.js','g')
-
-  " or simply
   :let &suffixesadd=".js,.coffee"
 endfunction
 
@@ -150,22 +153,18 @@ function! s:QuickFix(output, spliterror, splitname, splitline)
 endfunction
 
 
+" Store the error and add line for the quickfix window
 function! s:QuickFixAdd(qflist, name, line, reason)
-  " Store the error for the quickfix window
   let qfitem = {}
-  " let qfitem.bufnr = bufnr('%')
-  " let qfitem.filename = expand('%')
   let qfitem.filename = a:name
   let qfitem.lnum = a:line
   let qfitem.text = a:reason
   let qfitem.type = 'E'
-
-  " Add line to quickfix list
   call add(a:qflist, qfitem)
 endfunction
 
 "
-" Completion
+" ## Completion
 "
 
 " will probably write a node script to get this back from github api
@@ -182,7 +181,6 @@ function! s:Complete_docs(A,L,P)
     \ 'helpers_directives', 'plugins', 'task_concat', 'task_init',
     \ 'task_lint', 'task_min', 'task_qunit', 'task_server',
     \ 'toc', 'types_of_tasks']
-
   return s:completion_filter(pages, a:A)
 endfunction
 
@@ -206,13 +204,17 @@ endfunction
 
 
 "
-" Commands
+" ## Commands
 "
 
+"
+" ### Gdoc
+"
 " Task command -> :Gdoc <page>
 "
 " Open a given grunt doc page in default browser
 " borrowed to vim-rails
+"
 function! s:GDoc(bang, page)
   let url = 'https://github.com/cowboy/grunt/blob/master/docs/'.a:page.'.md'
   echo '... Opening ' . url . ' ...'
@@ -223,6 +225,8 @@ function! s:GDoc(bang, page)
   endif
 endfunction
 
+"
+" ### Gtask
 "
 " Task command -> :Gtask <task>
 "
@@ -260,6 +264,8 @@ function! s:GTask(bang, args)
 endfunction
 
 "
+" ### Glint
+"
 " Task command -> :Glint
 "
 " grunt lint wrapper, collect output for quickfix window. You can then
@@ -286,6 +292,8 @@ function! s:GLint()
   call s:LintAutoCmd(hasError)
 endfunction
 
+"
+" ### Gtest
 "
 " Task command -> :Gtest [<filename>]
 "
@@ -347,15 +355,15 @@ function! s:NodeQuickFix(output, script)
 endfunction
 
 
-
 "
-" Initialization
+" ## Initialization
 "
 
 " detect a grunt project, a little crude right now, just checking cwd's
 " gruntfile exists todo: it shoulld detect on both cwd (when starting
 " vim from console) and actual vim path (eg. vim ./some/nested/path) to
 " handle both case
+"
 function! s:Detect()
   let gruntfile = join([s:cwd, 'grunt.js'], '/')
   if filereadable(gruntfile)
@@ -425,7 +433,6 @@ function! s:GruntCommands()
   " should complete lint and test for subtargets, probably by parsing the gruntfile =/
   command! -bar -nargs=* -bang Glint call s:GLint()
 endfunction
-
 
 augroup gruntdetect
   autocmd!
