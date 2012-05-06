@@ -1,13 +1,16 @@
 grunt.vim
 =========
 
-This is a lightweight Vim plugin wrapper to [Grunt](http://gruntjs.com). Features:
+*A lightweight wrapper to Grunt, so that you could grunt things directly from Vim*
 
 This plugin tries to detect a valid Gruntfile
 (`{grunt|Gruntfile}.{js|coffee}`), in the current working directory. If
 it does, it defines a handy set of commands to work with grunt test or
 lint task, to browse one of grunt documentation page and significantly
-ease navigation of the Grunt directory structure. Features:
+ease navigation of the Grunt directory structure.
+
+There are a lot more features I'd like to see implemented or further improved,
+but it's already been quite useful to me. Features:
 
 * Interface to `grunt`.  Use `:Grunt` to run the given task(s), really
   similar to directly running `:!grunt --no-color <task, ...>`.
@@ -48,14 +51,17 @@ Installation
 Using [pathogen.vim](https://github.com/tpope/vim-pathogen) is the best way to
 install this plugin. Actually, some of pathogen function helpers are
 used internally, so pathogen might very well be considered as one of
-grunt.vim dependency (the only one actually)
+grunt.vim dependency.
 
     cd ~/.vim/bundle
     git clone git://github.com/mklabs/vim-grunt.git
 
 Once help tags have been generated (either manually with `:helptags` or
-via pathogen's `:Helptags` which might very well be direcly put in your
+via pathogen's `:Helptags` which might very well be directly put in your
 `.vimrc`)  you can view the manual with `:help grunt`.
+
+This plugin also assumes both node and grunt are installed and available in
+your `$PATH`, but that sounds reasonable for a Vim Grunt plugin.
 
 quickfix
 --------
