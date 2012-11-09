@@ -54,7 +54,7 @@ used internally, so pathogen might very well be considered as one of
 grunt.vim dependency.
 
     cd ~/.vim/bundle
-    git clone git://github.com/mklabs/vim-grunt.git
+    git clone git://github.com/mklabs/grunt.vim.git
 
 Once help tags have been generated (either manually with `:helptags` or
 via pathogen's `:Helptags` which might very well be directly put in your
