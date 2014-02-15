@@ -33,7 +33,7 @@ let s:dirname=expand('<sfile>:h:h')
 
 " spawn helper, basic wrapper to :!
 function! s:Grunt(bang, args)
-  let cmd = 'grunt --no-color '.a:args
+  let cmd = 'grunt '.a:args
   execute ':!'.cmd
 endfunction
 
